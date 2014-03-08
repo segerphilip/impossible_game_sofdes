@@ -14,10 +14,15 @@ import time
 
 class ImpossibleGameModel:
 	"""Encodes the game state of the ImpossibleGame"""
-	def __init__(self):
+	def __init__(self,size):
+		self.width = size[0]
+		self.height = size[1]
+		self.time_int = 0
 		self.number_of_lives = 3
 		self.blocks = []
 		new_block = HorBlock(200, 200, -1, 10,100,(255,255,255))
+		self.blocks.append(new_block)
+		new_block = HorBlock(100, 300, 1, 10,100,(255,255,255))
 		self.blocks.append(new_block)
 		#new_obstacle = Obstacles(10,10,100,20,(255,0,0))
 		#self.obstacles.append(new_obstacle)
@@ -27,9 +32,14 @@ class ImpossibleGameModel:
 		self.pointer.update()
 		for block in self.blocks:
 			block.update()
+		for block in self.blocks:
+			if (block.x+block.width) < 0 or block.x > self.width or (block.y+block.height) < 0 or block.y > self.height:
+				self.blocks.remove(block)
+				print(self.blocks)
 
-	def generateBlock(self, time):
+	def generateBlocks(self):
 		pass
+		
 
 class PointerArrow:
 	"""Encodes the state of the pointer arrow"""
@@ -83,6 +93,12 @@ class PyGameImpossibleGameView:
 		pygame.draw.rect(self.screen, pygame.Color(self.model.pointer.color[0], self.model.pointer.color[1], self.model.pointer.color[2]), pygame.Rect(self.model.pointer.x, self.model.pointer.y, self.model.pointer.width, self.model.pointer.height))
 		for block in model.blocks:
 			pygame.draw.rect(self.screen, pygame.Color(block.color[0], block.color[1], block.color[2]), pygame.Rect(block.x, block.y, block.width, block.height))
+		font = pygame.font.Font(None, 36)
+		text = font.render(str(model.time_int), True, (255,255,255))
+		textRect = text.get_rect()
+		textRect.centerx = model.width-20
+		textRect.centery = 20
+		screen.blit(text, textRect)
 		pygame.display.update()
 
 class PyGameKeyboardController:
@@ -122,11 +138,17 @@ if __name__ == '__main__':
 		size = (640, 480)
 		screen = pygame.display.set_mode(size)
 
-		model = ImpossibleGameModel()
+		model = ImpossibleGameModel(size)
 		view = PyGameImpossibleGameView(model, screen)
 		controller = PyGameKeyboardController(model)
 		running = True
+		start_time = time.time()
 		while running:
+			time_since_start = time.time() - start_time
+			if int(time_since_start) > model.time_int:   #Evaluated once per second
+				model.generateBlocks()
+				model.time_int = int(time_since_start)
+				#print(model.time_int) #used to test clock
 			for event in pygame.event.get():
 				if event.type == KEYDOWN:
 					if event.key == K_ESCAPE:
