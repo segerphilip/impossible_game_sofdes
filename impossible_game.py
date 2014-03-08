@@ -39,11 +39,22 @@ class PointerArrow:
 		self.x += self.vx
 		self.y += self.vy
 
-class Obstacles:
-	"""Encodes the state of the oncoming obstacles"""
-	def __init__(self, x, y, width, height, color):
+class VertBlocks:
+	"""Encodes the state of the oncoming blocks moving in the y axis"""
+	def __init__(self, x, y, vy, width, height, color):
 		self.x = x
 		self.y = y
+		self.vy = vy
+		self.width = width
+		self.height = height
+		self.color = color
+
+class HorBlocks:
+	"""Encodes the state of the oncoming blocks moving in the x axis"""
+	def __init__(self, x, y, vx, width, height, color):
+		self.x = x
+		self.y = y
+		self.vx = vx
 		self.width = width
 		self.height = height
 		self.color = color
@@ -65,16 +76,27 @@ class PyGameKeyboardController:
 		self.model = model
 
 	def handle_pygame_event(self, event):
-		if event.type != KEYDOWN:
+		velocity = 2.0
+		if event.type == KEYDOWN:
+			if event.key == pygame.K_LEFT:
+				self.model.pointer.vx += -velocity
+			if event.key == pygame.K_RIGHT:
+				self.model.pointer.vx += velocity
+			if event.key == pygame.K_UP:
+				self.model.pointer.vy += -velocity
+			if event.key == pygame.K_DOWN:
+				self.model.pointer.vy += velocity
+		elif event.type == KEYUP:
+			if event.key == pygame.K_LEFT:
+				self.model.pointer.vx = 0
+			if event.key == pygame.K_RIGHT:
+				self.model.pointer.vx = 0
+			if event.key == pygame.K_UP:
+				self.model.pointer.vy = 0
+			if event.key == pygame.K_DOWN:
+				self.model.pointer.vy = 0
+		else:
 			return
-		if event.key == pygame.K_LEFT:
-			self.model.pointer.vx += -1.0
-		if event.key == pygame.K_RIGHT:
-			self.model.pointer.vx += 1.0
-		if event.key == pygame.K_UP:
-			self.model.pointer.vy += -1.0
-		if event.key == pygame.K_DOWN:
-			self.model.pointer.vy += 1.0
 
 #set up all the functions needed
 if __name__ == '__main__':
