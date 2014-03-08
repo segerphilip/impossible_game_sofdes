@@ -36,10 +36,15 @@ class ImpossibleGameModel:
 		for block in self.blocks:
 			if (block.x+block.width) < 0 or block.x > self.width or (block.y+block.height) < 0 or block.y > self.height:
 				self.blocks.remove(block)
-				print(self.blocks)
+				#print(self.blocks)
+		for block in self.blocks:
+			if block.pointer_collide(self.pointer):
+				print((block.x,block.y))
+				time.sleep(5)
+				print("bang" + str(self.time_int))
+				self.pointer.color = (255,0,0)
 
 	def generateBlocks(self):
-		print(range(0,int(self.time_int / 20)+1))
 		for n in range(0,int(self.time_int / 10)+1):
 			if randint(0,1) == 0:               #create block moving in x axis
 				width = 10
@@ -97,6 +102,18 @@ class VertBlock:
 	def update(self):
 		self.y += self.vy
 
+	def pointer_collide(self,pointer):
+		if pointer.x < (self.x+self.width) and pointer.x > self.x and (self.y-pointer.height) > pointer.y > (self.y+self.height): #Hit on block right
+			return True
+		elif (pointer.x+pointer.width) > self.x and (pointer.x+pointer.width) < (self.x+self.width) and (self.y-pointer.height) > pointer.y > (self.y+self.height): #Hit on block left 
+			return True
+		elif pointer.y > (self.y+self.height) and pointer.y < self.y and (self.x-pointer.width) > pointer.x > (self.x+self.width): #Hit on bottom of block
+			return True
+		elif (pointer.y+pointer.height) < self.y and (pointer.y+pointer.height) > (self.y+self.height) and (self.x-pointer.width) > pointer.x > (self.x+self.width): #Hit on top of block
+			return True
+		else:
+			return False
+
 class HorBlock:
 	"""Encodes the state of the oncoming blocks moving in the x axis"""
 	def __init__(self, x, y, vx, width, height, color):
@@ -109,6 +126,18 @@ class HorBlock:
 
 	def update(self):
 		self.x += self.vx
+
+	def pointer_collide(self,pointer):
+		if pointer.x < (self.x+self.width) and pointer.x > self.x and (self.y-pointer.height) > pointer.y > (self.y+self.height): #Hit on block right
+			return True
+		elif (pointer.x+pointer.width) > self.x and (pointer.x+pointer.width) < (self.x+self.width) and (self.y-pointer.height) > pointer.y > (self.y+self.height): #Hit on block left 
+			return True
+		elif pointer.y > (self.y+self.height) and pointer.y < self.y and (self.x-pointer.width) > pointer.x > (self.x+self.width): #Hit on bottom of block
+			return True
+		elif (pointer.y+pointer.height) < self.y and (pointer.y+pointer.height) > (self.y+self.height) and (self.x-pointer.width) > pointer.x > (self.x+self.width): #Hit on top of block
+			return True
+		else:
+			return False
 
 class PyGameImpossibleGameView:
 	"""Renders the ImpossibleGame to a pygame window"""
