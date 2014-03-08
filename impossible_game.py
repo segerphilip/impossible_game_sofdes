@@ -9,6 +9,7 @@ Program: ImpossibleGame
 import pygame
 from pygame.locals import *
 import random
+from random import randint
 import math
 import time
 
@@ -38,7 +39,34 @@ class ImpossibleGameModel:
 				print(self.blocks)
 
 	def generateBlocks(self):
-		pass
+		print(range(0,int(self.time_int / 20)+1))
+		for n in range(0,int(self.time_int / 10)+1):
+			if randint(0,1) == 0:               #create block moving in x axis
+				width = 10
+				height = randint(10,160)
+				if randint(0,1) == 0:           #start on left side
+					start_x = -9
+					start_y = randint(0,self.height-height)
+					start_vx = randint(1,2)
+				else:                           #start on right side
+					start_x = self.width-1
+					start_y = randint(0,self.height-height)
+					start_vx = -randint(1,2)
+				new_block = HorBlock(start_x,start_y,start_vx,width,height,(255,255,255))
+			else:                               #create block moving in y axis
+				width = randint(10,160)
+				height = 10
+				if randint(0,1) == 0:           #start at top
+					start_x = randint(0,self.width-width)
+					start_y = -9
+					start_vx = randint(1,2)
+				else:                           #start at bottom
+					start_x = randint(0,self.width-width)
+					start_y = self.height-1
+					start_vx = -randint(1,2)
+				new_block = VertBlock(start_x,start_y,start_vx,width,height,(255,255,255))
+			self.blocks.append(new_block)
+
 		
 
 class PointerArrow:
