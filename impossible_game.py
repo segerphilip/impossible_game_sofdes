@@ -30,14 +30,16 @@ class ImpossibleGameModel:
 		self.pointer = PointerArrow(320,240,10,10)
 
 	def update(self):
-		number_collisions = 0
+		collision = False
 		self.pointer.update()
 		for block in self.blocks:
 			block.update()
 			if (block.x+block.width) < 0 or block.x > self.width or (block.y+block.height) < 0 or block.y > self.height:
 				self.blocks.remove(block)
-			if block.pointer_collide(self.pointer):
-				number_collisions += 1
+			if block.pointer_collide(self.pointer) and collision == False:
+				collision = True
+				game_over()
+
 		for block1 in self.blocks:
 			for block2 in self.blocks:
 				if block1.block_collide(block2):
@@ -98,11 +100,6 @@ class ImpossibleGameModel:
 						if block2.width <=0:
 							self.blocks.remove(block2)
 
-		if number_collisions > 0:
-			self.pointer.color = (255,0,0)
-		else:
-			self.pointer.color = (255,255,255)
-
 	def generateBlocks(self):
 		for n in range(0,int(self.time_int / 10)+1):
 			if randint(0,1) == 0:               #create block moving in x axis
@@ -131,8 +128,6 @@ class ImpossibleGameModel:
 					start_vx = -randint(1,2)
 				new_block = VertBlock(start_x,start_y,start_vx,width,height,(255,255,255))
 			self.blocks.append(new_block)
-
-		
 
 class PointerArrow:
 	"""Encodes the state of the pointer arrow"""
@@ -259,6 +254,7 @@ def game_over():
 	screen.blit(text, textRect)
 	pygame.display.update()
 	time.sleep(2)
+	pygame.quit()
 
 #set up all the functions needed
 if __name__ == '__main__':
