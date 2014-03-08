@@ -30,19 +30,20 @@ class ImpossibleGameModel:
 		self.pointer = PointerArrow(320,240,10,10)
 
 	def update(self):
+		number_collisions = 0
 		self.pointer.update()
 		for block in self.blocks:
 			block.update()
 		for block in self.blocks:
 			if (block.x+block.width) < 0 or block.x > self.width or (block.y+block.height) < 0 or block.y > self.height:
 				self.blocks.remove(block)
-				#print(self.blocks)
 		for block in self.blocks:
 			if block.pointer_collide(self.pointer):
-				print((block.x,block.y))
-				time.sleep(5)
-				print("bang" + str(self.time_int))
-				self.pointer.color = (255,0,0)
+				number_collisions += 1
+		if number_collisions > 0:
+			self.pointer.color = (255,0,0)
+		else:
+			self.pointer.color = (255,255,255)
 
 	def generateBlocks(self):
 		for n in range(0,int(self.time_int / 10)+1):
@@ -103,13 +104,9 @@ class VertBlock:
 		self.y += self.vy
 
 	def pointer_collide(self,pointer):
-		if pointer.x < (self.x+self.width) and pointer.x > self.x and (self.y-pointer.height) > pointer.y > (self.y+self.height): #Hit on block right
+		if self.x < pointer.x < (self.x + self.width) and self.y < pointer.y < (self.y+ self.height):
 			return True
-		elif (pointer.x+pointer.width) > self.x and (pointer.x+pointer.width) < (self.x+self.width) and (self.y-pointer.height) > pointer.y > (self.y+self.height): #Hit on block left 
-			return True
-		elif pointer.y > (self.y+self.height) and pointer.y < self.y and (self.x-pointer.width) > pointer.x > (self.x+self.width): #Hit on bottom of block
-			return True
-		elif (pointer.y+pointer.height) < self.y and (pointer.y+pointer.height) > (self.y+self.height) and (self.x-pointer.width) > pointer.x > (self.x+self.width): #Hit on top of block
+		elif self.x < (pointer.x+pointer.width) < (self.x + self.width) and self.y < (pointer.y+pointer.height) < (self.y+ self.height):
 			return True
 		else:
 			return False
@@ -128,13 +125,9 @@ class HorBlock:
 		self.x += self.vx
 
 	def pointer_collide(self,pointer):
-		if pointer.x < (self.x+self.width) and pointer.x > self.x and (self.y-pointer.height) > pointer.y > (self.y+self.height): #Hit on block right
+		if self.x < pointer.x < (self.x + self.width) and self.y < pointer.y < (self.y+ self.height):
 			return True
-		elif (pointer.x+pointer.width) > self.x and (pointer.x+pointer.width) < (self.x+self.width) and (self.y-pointer.height) > pointer.y > (self.y+self.height): #Hit on block left 
-			return True
-		elif pointer.y > (self.y+self.height) and pointer.y < self.y and (self.x-pointer.width) > pointer.x > (self.x+self.width): #Hit on bottom of block
-			return True
-		elif (pointer.y+pointer.height) < self.y and (pointer.y+pointer.height) > (self.y+self.height) and (self.x-pointer.width) > pointer.x > (self.x+self.width): #Hit on top of block
+		elif self.x < (pointer.x+pointer.width) < (self.x + self.width) and self.y < (pointer.y+pointer.height) < (self.y+ self.height):
 			return True
 		else:
 			return False
