@@ -31,7 +31,6 @@ class ImpossibleGameModel:
 	def generateBlock(self, time):
 		pass
 
- 
 class PointerArrow:
 	"""Encodes the state of the pointer arrow"""
 	def __init__(self, x, y, width, height):
@@ -72,6 +71,7 @@ class HorBlock:
 
 	def update(self):
 		self.x += self.vx
+
 class PyGameImpossibleGameView:
 	"""Renders the ImpossibleGame to a pygame window"""
 	def __init__(self, model, screen):
@@ -115,22 +115,31 @@ class PyGameKeyboardController:
 
 #set up all the functions needed
 if __name__ == '__main__':
-	pygame.init()
+	restart = True
+	while restart:
+		pygame.init()
 
-	size = (640, 480)
-	screen = pygame.display.set_mode(size)
+		size = (640, 480)
+		screen = pygame.display.set_mode(size)
 
-	model = ImpossibleGameModel()
-	view = PyGameImpossibleGameView(model, screen)
-	controller = PyGameKeyboardController(model)
-	running = True
-	while running:
-		for event in pygame.event.get():
-			if event.type == QUIT:
-				running = False
-			controller.handle_pygame_event(event)
-		model.update()
-		view.draw()
-		time.sleep(.001)
+		model = ImpossibleGameModel()
+		view = PyGameImpossibleGameView(model, screen)
+		controller = PyGameKeyboardController(model)
+		running = True
+		while running:
+			for event in pygame.event.get():
+				if event.type == KEYDOWN:
+					if event.key == K_ESCAPE:
+						running = False
+						restart = False
+					if event.key == K_SPACE:
+						running = False
+				if event.type == QUIT:
+					running = False
+					restart = False
+				controller.handle_pygame_event(event)
+			model.update()
+			view.draw()
+			time.sleep(.001)
 
-	pygame.quite()
+		pygame.quit()

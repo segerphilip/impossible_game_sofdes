@@ -13,5 +13,6 @@ classes needed:
 
 	__main__
 
-Abstraction/ideas:
-	
+
+
+Space bar resets everything
