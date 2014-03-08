@@ -30,16 +30,22 @@ class ImpossibleGameModel:
 		self.pointer = PointerArrow(320,240,10,10)
 
 	def update(self):
+		number_collisions = 0
 		self.pointer.update()
 		for block in self.blocks:
 			block.update()
 		for block in self.blocks:
 			if (block.x+block.width) < 0 or block.x > self.width or (block.y+block.height) < 0 or block.y > self.height:
 				self.blocks.remove(block)
-				#print(self.blocks)				#testing block deletion
+		for block in self.blocks:
+			if block.pointer_collide(self.pointer):
+				number_collisions += 1
+		if number_collisions > 0:
+			self.pointer.color = (255,0,0)
+		else:
+			self.pointer.color = (255,255,255)
 
 	def generateBlocks(self):
-		#print(range(0,int(self.time_int / 20)+1))	#testing purposes
 		for n in range(0,int(self.time_int / 10)+1):
 			if randint(0,1) == 0:               #create block moving in x axis
 				width = 10
@@ -97,6 +103,14 @@ class VertBlock:
 	def update(self):
 		self.y += self.vy
 
+	def pointer_collide(self,pointer):
+		if self.x < pointer.x < (self.x + self.width) and self.y < pointer.y < (self.y+ self.height):
+			return True
+		elif self.x < (pointer.x+pointer.width) < (self.x + self.width) and self.y < (pointer.y+pointer.height) < (self.y+ self.height):
+			return True
+		else:
+			return False
+
 class HorBlock:
 	"""Encodes the state of the oncoming blocks moving in the x axis"""
 	def __init__(self, x, y, vx, width, height, color):
@@ -109,6 +123,14 @@ class HorBlock:
 
 	def update(self):
 		self.x += self.vx
+
+	def pointer_collide(self,pointer):
+		if self.x < pointer.x < (self.x + self.width) and self.y < pointer.y < (self.y+ self.height):
+			return True
+		elif self.x < (pointer.x+pointer.width) < (self.x + self.width) and self.y < (pointer.y+pointer.height) < (self.y+ self.height):
+			return True
+		else:
+			return False
 
 class PyGameImpossibleGameView:
 	"""Renders the ImpossibleGame to a pygame window"""
