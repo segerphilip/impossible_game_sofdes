@@ -36,10 +36,10 @@ class ImpossibleGameModel:
 		for block in self.blocks:
 			if (block.x+block.width) < 0 or block.x > self.width or (block.y+block.height) < 0 or block.y > self.height:
 				self.blocks.remove(block)
-				print(self.blocks)
+				#print(self.blocks)				#testing block deletion
 
 	def generateBlocks(self):
-		print(range(0,int(self.time_int / 20)+1))
+		#print(range(0,int(self.time_int / 20)+1))	#testing purposes
 		for n in range(0,int(self.time_int / 10)+1):
 			if randint(0,1) == 0:               #create block moving in x axis
 				width = 10
@@ -157,6 +157,16 @@ class PyGameKeyboardController:
 		else:
 			return
 
+def game_over():
+	font = pygame.font.Font(None, 36)
+	text = font.render(str('Game Over'), True, (255, 0, 0))
+	textRect = text.get_rect()
+	textRect.centerx = model.width-120
+	textRect.centery = 20
+	screen.blit(text, textRect)
+	pygame.display.update()
+	time.sleep(2)
+
 #set up all the functions needed
 if __name__ == '__main__':
 	restart = True
@@ -182,7 +192,7 @@ if __name__ == '__main__':
 					if event.key == K_ESCAPE:
 						running = False
 						restart = False
-					if event.key == K_SPACE:
+					if event.key == K_r:
 						running = False
 				if event.type == QUIT:
 					running = False
@@ -192,4 +202,4 @@ if __name__ == '__main__':
 			view.draw()
 			time.sleep(.001)
 
-		pygame.quit()
+		game_over()
