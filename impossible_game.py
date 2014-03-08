@@ -16,13 +16,21 @@ class ImpossibleGameModel:
 	"""Encodes the game state of the ImpossibleGame"""
 	def __init__(self):
 		self.number_of_lives = 3
-		self.obstacles = []
-		new_obstacle = Obstacles(10,10,100,20,(255,0,0))
-		self.obstacles.append(new_obstacle)
-		self.pointer = PointerArrow(0,0,10,10)
+		self.blocks = []
+		new_block = HorBlock(200, 200, -1, 10,100,(255,255,255))
+		self.blocks.append(new_block)
+		#new_obstacle = Obstacles(10,10,100,20,(255,0,0))
+		#self.obstacles.append(new_obstacle)
+		self.pointer = PointerArrow(320,240,10,10)
 
 	def update(self):
 		self.pointer.update()
+		for block in self.blocks:
+			block.update()
+
+	def generateBlock(self, time):
+		pass
+
  
 class PointerArrow:
 	"""Encodes the state of the pointer arrow"""
@@ -39,7 +47,7 @@ class PointerArrow:
 		self.x += self.vx
 		self.y += self.vy
 
-class VertBlocks:
+class VertBlock:
 	"""Encodes the state of the oncoming blocks moving in the y axis"""
 	def __init__(self, x, y, vy, width, height, color):
 		self.x = x
@@ -49,7 +57,10 @@ class VertBlocks:
 		self.height = height
 		self.color = color
 
-class HorBlocks:
+	def update(self):
+		self.y += self.vy
+
+class HorBlock:
 	"""Encodes the state of the oncoming blocks moving in the x axis"""
 	def __init__(self, x, y, vx, width, height, color):
 		self.x = x
@@ -59,6 +70,8 @@ class HorBlocks:
 		self.height = height
 		self.color = color
 
+	def update(self):
+		self.x += self.vx
 class PyGameImpossibleGameView:
 	"""Renders the ImpossibleGame to a pygame window"""
 	def __init__(self, model, screen):
@@ -68,6 +81,8 @@ class PyGameImpossibleGameView:
 	def draw(self):
 		self.screen.fill(pygame.Color(0,0,0))
 		pygame.draw.rect(self.screen, pygame.Color(self.model.pointer.color[0], self.model.pointer.color[1], self.model.pointer.color[2]), pygame.Rect(self.model.pointer.x, self.model.pointer.y, self.model.pointer.width, self.model.pointer.height))
+		for block in model.blocks:
+			pygame.draw.rect(self.screen, pygame.Color(block.color[0], block.color[1], block.color[2]), pygame.Rect(block.x, block.y, block.width, block.height))
 		pygame.display.update()
 
 class PyGameKeyboardController:
