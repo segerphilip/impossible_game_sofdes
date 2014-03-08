@@ -165,7 +165,7 @@ def game_over():
 	textRect.centery = 20
 	screen.blit(text, textRect)
 	pygame.display.update()
-	time.sleep(2)
+	time.sleep(1)
 
 #set up all the functions needed
 if __name__ == '__main__':
