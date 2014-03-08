@@ -1,0 +1,17 @@
+classes needed:
+	ImpossibleGameModel
+
+	PointerArrow
+
+	Obstacles
+
+	PyGameHitDetection
+
+	PyGameImpossibleGameView
+
+	PyGameKeyboardController
+
+	__main__
+
+Abstraction/ideas:
+	
