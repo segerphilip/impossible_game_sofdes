@@ -34,12 +34,70 @@ class ImpossibleGameModel:
 		self.pointer.update()
 		for block in self.blocks:
 			block.update()
-		for block in self.blocks:
 			if (block.x+block.width) < 0 or block.x > self.width or (block.y+block.height) < 0 or block.y > self.height:
 				self.blocks.remove(block)
-		for block in self.blocks:
 			if block.pointer_collide(self.pointer):
 				number_collisions += 1
+		for block1 in self.blocks:
+			for block2 in self.blocks:
+				if block1.block_collide(block2):
+					if isinstance(block1,HorBlock) and isinstance(block2,VertBlock) and block1.height > block2.width and block2.width > 0:
+						block1.height += 2*abs(block1.vx)
+						block1.y -= abs(block1.vx)
+						block2.width -= 2*abs(block1.vx)
+						block1.color = (255,0,0)
+						block2.color = (255,0,0)
+						if block2.width <=0:
+							self.blocks.remove(block2)
+					elif isinstance(block1,VertBlock) and isinstance(block2,HorBlock) and block1.width > block2.height and block2.height > 0:
+						block1.width += 2*abs(block1.vy)
+						block1.x -= abs(block1.vy)
+						block2.height -= 2*abs(block1.vy)
+						block1.color = (255,0,0)
+						block2.color = (255,0,0)
+						if block2.height <=0:
+							self.blocks.remove(block2)
+					elif isinstance(block1,HorBlock) and isinstance(block2,HorBlock) and block1.height > block2.height:
+						if block1.y < block2.y and (block2.y+block2.height) > (block1.y+block1.height):
+							difference = .25*((block1.y+block1.height)-block2.y)
+							block1.height += difference
+							block1.y -= difference
+							block2.height -= difference
+							block2.y += difference
+						elif block1.y < block2.y and (block2.y+block2.height) < (block1.y+block1.height):
+							difference = .25*block2.height
+							block1.height += difference
+							block1.y -= int(.5*difference)
+							block2.height = 0
+						elif block1.y > block2.y:
+							difference = .25*((block2.y+block2.height) - block1.y)
+							block1.height += difference
+							block2.height -= difference
+						block1.color = (255,0,0)
+						block2.color = (255,0,0)
+						if block2.height <=0:
+							self.blocks.remove(block2)
+					elif isinstance(block2,VertBlock) and isinstance(block2,VertBlock) and block1.width > block2.width:
+						if block1.x < block2.x and (block2.x+block2.width) > (block1.x+block1.width):
+							difference = .25*((block1.x+block1.width)-block2.x)
+							block1.width += difference
+							block1.x -= difference
+							block2.width -= difference
+							block2.x += difference
+						elif block1.x < block2.x and (block2.x+block2.width) < (block1.x+block1.width):
+							difference = .25*block2.width
+							block1.width += difference
+							block1.x -= int(.5*difference)
+							block2.width = 0
+						elif block1.x > block2.x:
+							difference = .25*((block2.x+block2.width) - block1.x)
+							block1.width += difference
+							block2.width -= difference
+						block1.color = (255,0,0)
+						block2.color = (255,0,0)
+						if block2.width <=0:
+							self.blocks.remove(block2)
+
 		if number_collisions > 0:
 			self.pointer.color = (255,0,0)
 		else:
@@ -59,6 +117,7 @@ class ImpossibleGameModel:
 					start_y = randint(0,self.height-height)
 					start_vx = -randint(1,2)
 				new_block = HorBlock(start_x,start_y,start_vx,width,height,(255,255,255))
+				print(type(new_block) == HorBlock)
 			else:                               #create block moving in y axis
 				width = randint(10,160)
 				height = 10
@@ -111,6 +170,12 @@ class VertBlock:
 		else:
 			return False
 
+	def block_collide(self,block):
+		if (self.x < block.x < (self.x + self.width) and self.y < block.y < (self.y+ self.height)) or (self.x < (block.x+block.width) < (self.x + self.width) and self.y < (block.y+block.height) < (self.y+ self.height)):
+			return True
+		else:
+			return False
+
 class HorBlock:
 	"""Encodes the state of the oncoming blocks moving in the x axis"""
 	def __init__(self, x, y, vx, width, height, color):
@@ -128,6 +193,12 @@ class HorBlock:
 		if self.x < pointer.x < (self.x + self.width) and self.y < pointer.y < (self.y+ self.height):
 			return True
 		elif self.x < (pointer.x+pointer.width) < (self.x + self.width) and self.y < (pointer.y+pointer.height) < (self.y+ self.height):
+			return True
+		else:
+			return False
+
+	def block_collide(self,block):
+		if (self.x < block.x < (self.x + self.width) and self.y < block.y < (self.y+ self.height)) or (self.x < (block.x+block.width) < (self.x + self.width) and self.y < (block.y+block.height) < (self.y+ self.height)):
 			return True
 		else:
 			return False
@@ -222,6 +293,6 @@ if __name__ == '__main__':
 				controller.handle_pygame_event(event)
 			model.update()
 			view.draw()
-			time.sleep(.001)
+			time.sleep(.01)
 
 		game_over()
