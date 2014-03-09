@@ -21,7 +21,6 @@ class ImpossibleGameModel:
 		self.width = size[0]
 		self.height = size[1]
 		self.time_int = 0
-		self.number_of_lives = 3
 		self.blocks = []
 		#new_obstacle = Obstacles(10,10,100,20,(255,0,0))
 		#self.obstacles.append(new_obstacle)
@@ -304,7 +303,7 @@ if __name__ == '__main__':
 					if event.key == K_ESCAPE:
 						running = False
 						restart = False
-					if event.key == K_r:
+					if event.key == K_SPACE:
 						running = False
 				if event.type == QUIT:
 					running = False
