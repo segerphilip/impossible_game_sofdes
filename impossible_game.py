@@ -21,10 +21,6 @@ class ImpossibleGameModel:
 		self.time_int = 0
 		self.number_of_lives = 3
 		self.blocks = []
-		new_block = HorBlock(200, 200, -1, 10,100,(255,255,255))
-		self.blocks.append(new_block)
-		new_block = HorBlock(100, 300, 1, 10,100,(255,255,255))
-		self.blocks.append(new_block)
 		#new_obstacle = Obstacles(10,10,100,20,(255,0,0))
 		#self.obstacles.append(new_obstacle)
 		self.pointer = PointerArrow(320,240,10,10)
@@ -36,9 +32,9 @@ class ImpossibleGameModel:
 			block.update()
 			if (block.x+block.width) < 0 or block.x > self.width or (block.y+block.height) < 0 or block.y > self.height:
 				self.blocks.remove(block)
-			if block.pointer_collide(self.pointer) and collision == False:
-				collision = True
-				game_over()
+			#if block.pointer_collide(self.pointer) and collision == False:
+				#collision = True
+				#game_over()
 
 		for block1 in self.blocks:
 			for block2 in self.blocks:
@@ -47,58 +43,44 @@ class ImpossibleGameModel:
 						block1.height += 2*abs(block1.vx)
 						block1.y -= abs(block1.vx)
 						block2.width -= 2*abs(block1.vx)
-						block1.color = (255,0,0)
-						block2.color = (255,0,0)
-						if block2.width <=0:
-							self.blocks.remove(block2)
 					elif isinstance(block1,VertBlock) and isinstance(block2,HorBlock) and block1.width > block2.height and block2.height > 0:
 						block1.width += 2*abs(block1.vy)
 						block1.x -= abs(block1.vy)
 						block2.height -= 2*abs(block1.vy)
-						block1.color = (255,0,0)
-						block2.color = (255,0,0)
-						if block2.height <=0:
-							self.blocks.remove(block2)
 					elif isinstance(block1,HorBlock) and isinstance(block2,HorBlock) and block1.height > block2.height:
 						if block1.y < block2.y and (block2.y+block2.height) > (block1.y+block1.height):
-							difference = .25*((block1.y+block1.height)-block2.y)
+							difference = ((block1.y+block1.height)-block2.y)
 							block1.height += difference
 							block1.y -= difference
 							block2.height -= difference
 							block2.y += difference
 						elif block1.y < block2.y and (block2.y+block2.height) < (block1.y+block1.height):
-							difference = .25*block2.height
+							difference = block2.height
 							block1.height += difference
 							block1.y -= int(.5*difference)
 							block2.height = 0
 						elif block1.y > block2.y:
-							difference = .25*((block2.y+block2.height) - block1.y)
+							difference = ((block2.y+block2.height) - block1.y)
 							block1.height += difference
 							block2.height -= difference
-						block1.color = (255,0,0)
-						block2.color = (255,0,0)
-						if block2.height <=0:
-							self.blocks.remove(block2)
 					elif isinstance(block2,VertBlock) and isinstance(block2,VertBlock) and block1.width > block2.width:
 						if block1.x < block2.x and (block2.x+block2.width) > (block1.x+block1.width):
-							difference = .25*((block1.x+block1.width)-block2.x)
+							difference = ((block1.x+block1.width)-block2.x)
 							block1.width += difference
 							block1.x -= difference
 							block2.width -= difference
 							block2.x += difference
 						elif block1.x < block2.x and (block2.x+block2.width) < (block1.x+block1.width):
-							difference = .25*block2.width
+							difference = block2.width
 							block1.width += difference
 							block1.x -= int(.5*difference)
 							block2.width = 0
 						elif block1.x > block2.x:
-							difference = .25*((block2.x+block2.width) - block1.x)
+							difference = ((block2.x+block2.width) - block1.x)
 							block1.width += difference
 							block2.width -= difference
-						block1.color = (255,0,0)
-						block2.color = (255,0,0)
-						if block2.width <=0:
-							self.blocks.remove(block2)
+					if block2.width <=0 or block2.height <= 0:
+						self.blocks.remove(block2)
 
 	def generateBlocks(self):
 		for n in range(0,int(self.time_int / 10)+1):
@@ -113,8 +95,7 @@ class ImpossibleGameModel:
 					start_x = self.width-1
 					start_y = randint(0,self.height-height)
 					start_vx = -randint(1,2)
-				new_block = HorBlock(start_x,start_y,start_vx,width,height,(255,255,255))
-				print(type(new_block) == HorBlock)
+				new_block = HorBlock(start_x,start_y,start_vx,width,height,(randint(20,255),randint(20,255),randint(20,255)))
 			else:                               #create block moving in y axis
 				width = randint(10,160)
 				height = 10
@@ -126,7 +107,7 @@ class ImpossibleGameModel:
 					start_x = randint(0,self.width-width)
 					start_y = self.height-1
 					start_vx = -randint(1,2)
-				new_block = VertBlock(start_x,start_y,start_vx,width,height,(255,255,255))
+				new_block = VertBlock(start_x,start_y,start_vx,width,height,(randint(20,255),randint(20,255),randint(20,255)))
 			self.blocks.append(new_block)
 
 class PointerArrow:
@@ -262,7 +243,7 @@ if __name__ == '__main__':
 	while restart:
 		pygame.init()
 
-		size = (640, 480)
+		size = (800, 800)
 		screen = pygame.display.set_mode(size)
 
 		model = ImpossibleGameModel(size)
