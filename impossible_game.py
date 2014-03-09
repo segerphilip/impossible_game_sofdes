@@ -124,8 +124,8 @@ class PointerArrow:
 		self.vy = 0.0
 
 	def update(self):
-		self.x += self.vx
-		self.y += self.vy
+		self.x += self.vx * 4
+		self.y += self.vy * 4
 
 class VertBlock:
 	"""Encodes the state of the oncoming blocks moving in the y axis"""
@@ -284,19 +284,21 @@ if __name__ == '__main__':
 		size = (640, 640)
 		screen = pygame.display.set_mode(size)
 
-
-
 		model = ImpossibleGameModel(size)
 		view = PyGameImpossibleGameView(model, screen)
 		controller = PyGameKeyboardController(model)
 		running = True
 		start_time = time.time()
+		clock = pygame.time.Clock()
 		while running:
+			#max fps at 30
+			clock.tick(30)
 			time_since_start = time.time() - start_time
 			if int(time_since_start) > model.time_int:   #Evaluated once per second
 				model.generateBlocks()
 				model.time_int = int(time_since_start)
 				#print(model.time_int) #used to test clock
+
 			for event in pygame.event.get():
 				if event.type == KEYDOWN:
 					if event.key == K_ESCAPE:
