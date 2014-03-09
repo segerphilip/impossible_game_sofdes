@@ -13,6 +13,8 @@ from random import randint
 import math
 import time
 
+
+
 class ImpossibleGameModel:
 	"""Encodes the game state of the ImpossibleGame"""
 	def __init__(self,size):
@@ -95,7 +97,7 @@ class ImpossibleGameModel:
 					start_x = self.width-1
 					start_y = randint(0,self.height-height)
 					start_vx = -randint(1,2)
-				new_block = HorBlock(start_x,start_y,start_vx,width,height,(randint(20,255),randint(20,255),randint(20,255)))
+				new_block = HorBlock(start_x,start_y,start_vx,width,height,(255,255,255,128))
 			else:                               #create block moving in y axis
 				width = randint(10,160)
 				height = 10
@@ -107,7 +109,7 @@ class ImpossibleGameModel:
 					start_x = randint(0,self.width-width)
 					start_y = self.height-1
 					start_vx = -randint(1,2)
-				new_block = VertBlock(start_x,start_y,start_vx,width,height,(randint(20,255),randint(20,255),randint(20,255)))
+				new_block = VertBlock(start_x,start_y,start_vx,width,height,(255,255,255,128))
 			self.blocks.append(new_block)
 
 class PointerArrow:
@@ -184,12 +186,27 @@ class PyGameImpossibleGameView:
 	def __init__(self, model, screen):
 		self.model = model
 		self.screen = screen
+		self.background = pygame.image.load("background4.png")
+		self.color_counter = 550
+		self.counter_max = 600.0
 
 	def draw(self):
-		self.screen.fill(pygame.Color(0,0,0))
+		#Code for the new fancy background
+		screen.blit(self.background, (0,0))
+		rect = pygame.Surface((self.model.width,self.model.height), pygame.SRCALPHA, 32)
+		rect.fill(self.color_scroll())
+		self.screen.blit(rect,(0,0))
+		self.color_counter += 1
+		if self.color_counter >= self.counter_max:
+			self.color_counter = 1
+
+		#drawing the actual game objects
 		pygame.draw.rect(self.screen, pygame.Color(self.model.pointer.color[0], self.model.pointer.color[1], self.model.pointer.color[2]), pygame.Rect(self.model.pointer.x, self.model.pointer.y, self.model.pointer.width, self.model.pointer.height))
 		for block in model.blocks:
-			pygame.draw.rect(self.screen, pygame.Color(block.color[0], block.color[1], block.color[2]), pygame.Rect(block.x, block.y, block.width, block.height))
+			rect = pygame.Surface((block.width,block.height), pygame.SRCALPHA, 32)
+			rect.fill(block.color)
+			self.screen.blit(rect,(block.x,block.y))
+			#pygame.draw.rect(self.screen, block.color, pygame.Rect(block.x, block.y, block.width, block.height))
 		font = pygame.font.Font(None, 36)
 		text = font.render(str(model.time_int), True, (255,255,255))
 		textRect = text.get_rect()
@@ -197,6 +214,27 @@ class PyGameImpossibleGameView:
 		textRect.centery = 20
 		screen.blit(text, textRect)
 		pygame.display.update()
+
+	def color_scroll(self):
+		phase1 = (1*self.counter_max)/6.0
+		phase2 = (2*self.counter_max)/6.0
+		phase3 = (3*self.counter_max)/6.0
+		phase4 = (4*self.counter_max)/6.0
+		phase5 = (5*self.counter_max)/6.0
+		phase6 = self.counter_max
+		alpha = 80
+		if 0 <= self.color_counter < phase1:
+			return (255,0,int((self.color_counter/phase1)*255),alpha)
+		elif phase1 <= self.color_counter < phase2:
+			return (int((1-((self.color_counter-phase1)/phase1))*255),0,255,alpha)
+		elif phase2 <= self.color_counter < phase3:
+			return (0,int(((self.color_counter-phase2)/phase1)*255),255,alpha)
+		elif phase3 <= self.color_counter < phase4:
+			return (0,255,int((1-((self.color_counter-phase3)/phase1))*255),alpha)
+		elif phase4 <= self.color_counter < phase5:
+			return (int(((self.color_counter-phase4)/phase1)*255),255,0,alpha)
+		elif phase5 <= self.color_counter:
+			return (255,int((1-((self.color_counter-phase5)/phase1))*255),0,alpha)
 
 class PyGameKeyboardController:
 	"""Takes keyboard input so you can manipulate the game state"""
@@ -228,7 +266,7 @@ class PyGameKeyboardController:
 
 def game_over():
 	font = pygame.font.Font(None, 36)
-	text = font.render(str('Game Over'), True, (255, 0, 0))
+	text = font.render(str('Game Over'), True, (255, 255, 255))
 	textRect = text.get_rect()
 	textRect.centerx = model.width-120
 	textRect.centery = 20
@@ -243,8 +281,10 @@ if __name__ == '__main__':
 	while restart:
 		pygame.init()
 
-		size = (800, 800)
+		size = (640, 640)
 		screen = pygame.display.set_mode(size)
+
+
 
 		model = ImpossibleGameModel(size)
 		view = PyGameImpossibleGameView(model, screen)
