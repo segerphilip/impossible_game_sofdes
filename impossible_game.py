@@ -34,9 +34,9 @@ class ImpossibleGameModel:
 			block.update()
 			if (block.x+block.width) < 0 or block.x > self.width or (block.y+block.height) < 0 or block.y > self.height:
 				self.blocks.remove(block)
-			#if block.pointer_collide(self.pointer) and collision == False:
-				#collision = True
-				#game_over()
+			if block.pointer_collide(self.pointer) and collision == False:
+				collision = True
+				game_over()
 
 		for block1 in self.blocks:
 			for block2 in self.blocks:
@@ -291,7 +291,7 @@ if __name__ == '__main__':
 		start_time = time.time()
 		clock = pygame.time.Clock()
 		while running:
-			#max fps at 30
+			#max fps at 30=
 			clock.tick(30)
 			time_since_start = time.time() - start_time
 			if int(time_since_start) > model.time_int:   #Evaluated once per second
