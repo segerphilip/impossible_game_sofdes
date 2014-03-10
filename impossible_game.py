@@ -27,61 +27,95 @@ class ImpossibleGameModel:
 		self.pointer = PointerArrow(320,240,10,10)
 
 	def update(self):
+		block_max = .3*self.width
+		block_min = self.pointer.width
 		collision = False
-		self.pointer.update()
 		for block in self.blocks:
 			block.update()
 			if (block.x+block.width) < 0 or block.x > self.width or (block.y+block.height) < 0 or block.y > self.height:
 				self.blocks.remove(block)
-			#if block.pointer_collide(self.pointer) and collision == False:
-				#collision = True
-				#game_over()
+			if randint(1,200) == 1:
+				block.vx = -block.vx
+				block.vy = -block.vy
+			if block.pointer_collide(self.pointer) and collision == False:
+				collision = True
+				game_over()
+		if self.pointer.x <= 0 or self.pointer.y <= 0 or (self.pointer.x+self.pointer.width) >= self.width or (self.pointer.y+self.pointer.height) >= self.height:
+			if self.pointer.vx < 0:
+				self.pointer.x = 1
+			if self.pointer.vx > 0:
+				self.pointer.x = self.width-self.pointer.width-1
+			if self.pointer.vy < 0:
+				self.pointer.y = 1
+			if self.pointer.vy > 0:
+				self.pointer.y = self.height-self.pointer.height-1
+			self.pointer.vx = 0
+			self.pointer.vy = 0
+		self.pointer.update()
+
+		if randint(1,1000) == 1:         #1 in 1000 probability of all blocks changing direction
+			for block in self.blocks:
+				block.vx = -block.vx
+				block.vy = -block.vy
 
 		for block1 in self.blocks:
+			collide = False
 			for block2 in self.blocks:
-				if block1.block_collide(block2):
+				if block1.block_collide(block2) and block1 != block2:
+					collide = True
 					if isinstance(block1,HorBlock) and isinstance(block2,VertBlock) and block1.height > block2.width and block2.width > 0:
-						block1.height += 2*abs(block1.vx)
-						block1.y -= abs(block1.vx)
+						if block1.height < block_max:
+							block1.height += 2*abs(block1.vx)
+							block1.y -= abs(block1.vx)
 						block2.width -= 2*abs(block1.vx)
 					elif isinstance(block1,VertBlock) and isinstance(block2,HorBlock) and block1.width > block2.height and block2.height > 0:
-						block1.width += 2*abs(block1.vy)
-						block1.x -= abs(block1.vy)
+						if block1.width < block_max:
+							block1.width += 2*abs(block1.vy)
+							block1.x -= abs(block1.vy)
 						block2.height -= 2*abs(block1.vy)
 					elif isinstance(block1,HorBlock) and isinstance(block2,HorBlock) and block1.height > block2.height:
 						if block1.y < block2.y and (block2.y+block2.height) > (block1.y+block1.height):
 							difference = ((block1.y+block1.height)-block2.y)
-							block1.height += difference
-							block1.y -= difference
+							if block1.height < block_max:
+								block1.height += difference
+								block1.y -= difference
 							block2.height -= difference
 							block2.y += difference
 						elif block1.y < block2.y and (block2.y+block2.height) < (block1.y+block1.height):
 							difference = block2.height
-							block1.height += difference
-							block1.y -= int(.5*difference)
+							if block1.height < block_max:
+								block1.height += difference
+								block1.y -= int(.5*difference)
 							block2.height = 0
 						elif block1.y > block2.y:
 							difference = ((block2.y+block2.height) - block1.y)
-							block1.height += difference
+							if block1.height < block_max:
+								block1.height += difference
 							block2.height -= difference
 					elif isinstance(block2,VertBlock) and isinstance(block2,VertBlock) and block1.width > block2.width:
 						if block1.x < block2.x and (block2.x+block2.width) > (block1.x+block1.width):
 							difference = ((block1.x+block1.width)-block2.x)
-							block1.width += difference
-							block1.x -= difference
+							if block1.width < block_max:
+								block1.width += difference
+								block1.x -= difference
 							block2.width -= difference
 							block2.x += difference
 						elif block1.x < block2.x and (block2.x+block2.width) < (block1.x+block1.width):
 							difference = block2.width
-							block1.width += difference
-							block1.x -= int(.5*difference)
+							if block1.width < block_max:
+								block1.width += difference
+								block1.x -= int(.5*difference)
 							block2.width = 0
 						elif block1.x > block2.x:
 							difference = ((block2.x+block2.width) - block1.x)
-							block1.width += difference
+							if block1.width < block_max:
+								block1.width += difference
 							block2.width -= difference
-					if block2.width <=0 or block2.height <= 0:
+					if block2.width <= block_min and block2.height <= block_min:
 						self.blocks.remove(block2)
+				if block2.width < block_min and collide == True or block2.height < block_min and collide == True:
+					block2.width = block_min
+					block2.height = block_min
 
 	def generateBlocks(self):
 		for n in range(0,int(self.time_int / 10)+1):
@@ -110,6 +144,10 @@ class ImpossibleGameModel:
 					start_vx = -randint(1,2)
 				new_block = VertBlock(start_x,start_y,start_vx,width,height,(255,255,255,128))
 			self.blocks.append(new_block)
+			for block in self.blocks[:-1]:
+				if new_block.block_collide(block):
+					self.blocks = self.blocks[:-1]
+
 
 class PointerArrow:
 	"""Encodes the state of the pointer arrow"""
@@ -132,6 +170,7 @@ class VertBlock:
 		self.x = x
 		self.y = y
 		self.vy = vy
+		self.vx = 0
 		self.width = width
 		self.height = height
 		self.color = color
@@ -148,7 +187,7 @@ class VertBlock:
 			return False
 
 	def block_collide(self,block):
-		if (self.x < block.x < (self.x + self.width) and self.y < block.y < (self.y+ self.height)) or (self.x < (block.x+block.width) < (self.x + self.width) and self.y < (block.y+block.height) < (self.y+ self.height)):
+		if (self.x <= block.x <= (self.x + self.width) and self.y <= block.y <= (self.y+ self.height)) or (self.x <= (block.x+block.width) <= (self.x + self.width) and self.y <= (block.y+block.height) <= (self.y+ self.height)):
 			return True
 		else:
 			return False
@@ -159,6 +198,7 @@ class HorBlock:
 		self.x = x
 		self.y = y
 		self.vx = vx
+		self.vy = 0
 		self.width = width
 		self.height = height
 		self.color = color
@@ -175,7 +215,7 @@ class HorBlock:
 			return False
 
 	def block_collide(self,block):
-		if (self.x < block.x < (self.x + self.width) and self.y < block.y < (self.y+ self.height)) or (self.x < (block.x+block.width) < (self.x + self.width) and self.y < (block.y+block.height) < (self.y+ self.height)):
+		if (self.x <= block.x <= (self.x + self.width) and self.y <= block.y <= (self.y+ self.height)) or (self.x <= (block.x+block.width) <= (self.x + self.width) and self.y <= (block.y+block.height) <= (self.y+ self.height)):
 			return True
 		else:
 			return False
