@@ -32,7 +32,11 @@ class ImpossibleGameModel:
 		self.pointer = PointerArrow(320,240,10,10)
 
 	def update(self):
-		"""Update all elements of the game state"""
+		"""Update all elements of the game state...
+			This also includes collision detection
+			and properly removing a block once it is
+			off screen so it does not cause lag
+		"""
 		block_max = .3*self.width
 		block_min = self.pointer.width
 		collision = False
@@ -66,7 +70,11 @@ class ImpossibleGameModel:
 				block.vy = -block.vy
 
 		for block1 in self.blocks:
-			"""Larger blocks eat smaller blocks"""
+			"""Larger blocks eat smaller blocks...
+				This takes into account a max block size
+				so they do not fill the whole screen while
+				still being challenging
+			"""
 			collide = False
 			for block2 in self.blocks:
 				if block1.block_collide(block2) and block1 != block2:
@@ -185,7 +193,8 @@ class VertBlock:
 		self.color = color
 
 	def update(self):
-		self.y += self.vy
+		#change this to make the game more difficult, faster blocks
+		self.y += self.vy * 3
 
 	def pointer_collide(self,pointer):
 		"""Encodes whether the pointer collides with anything"""
@@ -215,9 +224,11 @@ class HorBlock:
 		self.color = color
 
 	def update(self):
-		self.x += self.vx
+		#change this to make the game more difficult, faster blocks
+		self.x += self.vx * 3
 
 	def pointer_collide(self,pointer):
+		#pointer collision detection
 		if self.x < pointer.x < (self.x + self.width) and self.y < pointer.y < (self.y+ self.height):
 			return True
 		elif self.x < (pointer.x+pointer.width) < (self.x + self.width) and self.y < (pointer.y+pointer.height) < (self.y+ self.height):
@@ -226,6 +237,7 @@ class HorBlock:
 			return False
 
 	def block_collide(self,block):
+		#block collision detection
 		if (self.x <= block.x <= (self.x + self.width) and self.y <= block.y <= (self.y+ self.height)) or (self.x <= (block.x+block.width) <= (self.x + self.width) and self.y <= (block.y+block.height) <= (self.y+ self.height)):
 			return True
 		else:
@@ -333,6 +345,7 @@ if __name__ == '__main__':
 	restart = True
 	while restart:
 		pygame.init()
+		#added a song for more appeal as a full game experience
 		pygame.mixer.music.load('Savant - ISM.ogg')
 		pygame.mixer.music.play(-1)
 
@@ -346,8 +359,8 @@ if __name__ == '__main__':
 		start_time = time.time()
 		clock = pygame.time.Clock()
 		while running:
-			#max fps at 30=
-			clock.tick(30)
+			#max fps at 60 so power isn't wasted
+			clock.tick(60)
 			time_since_start = time.time() - start_time
 			if int(time_since_start) > model.time_int:   #Evaluated once per second
 				model.generateBlocks()
