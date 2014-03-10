@@ -122,7 +122,7 @@ class ImpossibleGameModel:
 					block2.height = block_min
 
 	def generateBlocks(self):
-		for n in range(0,int(self.time_int / 10)+1):
+		for n in range(0,int(self.time_int / 5)+1):
 			if randint(0,1) == 0:               #create block moving in x axis
 				width = 10
 				height = randint(10,160)
