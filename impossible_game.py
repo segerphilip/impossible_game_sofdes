@@ -18,6 +18,7 @@ import time
 class ImpossibleGameModel:
 	"""Encodes the game state of the ImpossibleGame"""
 	def __init__(self,size):
+		"""Initialize properties of model"""
 		self.width = size[0]
 		self.height = size[1]
 		self.time_int = 0
@@ -27,20 +28,22 @@ class ImpossibleGameModel:
 		self.pointer = PointerArrow(320,240,10,10)
 
 	def update(self):
+		"""Update all elements of the game state"""
 		block_max = .3*self.width
 		block_min = self.pointer.width
 		collision = False
 		for block in self.blocks:
-			block.update()
-			if (block.x+block.width) < 0 or block.x > self.width or (block.y+block.height) < 0 or block.y > self.height:
-				self.blocks.remove(block)
-			if randint(1,200) == 1:
+			if randint(1,200) == 1:       #1 in 200 probability of block randomly changing direction
 				block.vx = -block.vx
 				block.vy = -block.vy
+			if (block.x+block.width) < 0 or block.x > self.width or (block.y+block.height) < 0 or block.y > self.height:
+				self.blocks.remove(block) #If block moves off screen, removing from update list
 			if block.pointer_collide(self.pointer) and collision == False:
 				collision = True
 				game_over()
+			block.update() # Update blocks normally
 		if self.pointer.x <= 0 or self.pointer.y <= 0 or (self.pointer.x+self.pointer.width) >= self.width or (self.pointer.y+self.pointer.height) >= self.height:
+			"""If pointer moves off screen, stop it"""
 			if self.pointer.vx < 0:
 				self.pointer.x = 1
 			if self.pointer.vx > 0:
@@ -51,14 +54,15 @@ class ImpossibleGameModel:
 				self.pointer.y = self.height-self.pointer.height-1
 			self.pointer.vx = 0
 			self.pointer.vy = 0
-		self.pointer.update()
+		self.pointer.update() #Update pointer normally
 
-		if randint(1,1000) == 1:         #1 in 1000 probability of all blocks changing direction
+		if randint(1,1000) == 1: #1 in 1000 probability of all blocks changing direction
 			for block in self.blocks:
 				block.vx = -block.vx
 				block.vy = -block.vy
 
 		for block1 in self.blocks:
+			"""Larger blocks eat smaller blocks"""
 			collide = False
 			for block2 in self.blocks:
 				if block1.block_collide(block2) and block1 != block2:
