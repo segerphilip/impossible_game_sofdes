@@ -4,6 +4,11 @@ Created: 3/7/14
 Program: ImpossibleGame
 
 @author: iangmhill, segerphilip
+
+This game is built to have the time alive as the score.
+The longer you live, the better time, the better score.
+The more time goes on, the more random the block generation
+is and the more blocks that spawn each second. 
 """
 
 import pygame
@@ -12,8 +17,7 @@ import random
 from random import randint
 import math
 import time
-
-
+import os
 
 class ImpossibleGameModel:
 	"""Encodes the game state of the ImpossibleGame"""
@@ -123,6 +127,7 @@ class ImpossibleGameModel:
 
 	def generateBlocks(self):
 		for n in range(0,int(self.time_int / 5)+1):
+		"""Randomly generate new blocks depending on time"""
 			if randint(0,1) == 0:               #create block moving in x axis
 				width = 10
 				height = randint(10,160)
@@ -165,7 +170,7 @@ class PointerArrow:
 		self.vy = 0.0
 
 	def update(self):
-		self.x += self.vx * 4
+		self.x += self.vx * 4	#self.vx * 4 makes it more fun :)
 		self.y += self.vy * 4
 
 class VertBlock:
@@ -183,6 +188,7 @@ class VertBlock:
 		self.y += self.vy
 
 	def pointer_collide(self,pointer):
+		"""Encodes whether the pointer collides with anything"""
 		if self.x < pointer.x < (self.x + self.width) and self.y < pointer.y < (self.y+ self.height):
 			return True
 		elif self.x < (pointer.x+pointer.width) < (self.x + self.width) and self.y < (pointer.y+pointer.height) < (self.y+ self.height):
@@ -191,6 +197,7 @@ class VertBlock:
 			return False
 
 	def block_collide(self,block):
+		"""Encodes whether the blocks collide with anything"""
 		if (self.x <= block.x <= (self.x + self.width) and self.y <= block.y <= (self.y+ self.height)) or (self.x <= (block.x+block.width) <= (self.x + self.width) and self.y <= (block.y+block.height) <= (self.y+ self.height)):
 			return True
 		else:
@@ -259,6 +266,7 @@ class PyGameImpossibleGameView:
 		pygame.display.update()
 
 	def color_scroll(self):
+		"""Add a transparent layer over the photo that changes color"""
 		phase1 = (1*self.counter_max)/6.0
 		phase2 = (2*self.counter_max)/6.0
 		phase3 = (3*self.counter_max)/6.0
@@ -286,6 +294,7 @@ class PyGameKeyboardController:
 
 	def handle_pygame_event(self, event):
 		velocity = 2.0
+		"""Velocity is controlled only when the key is held"""
 		if event.type == KEYDOWN:
 			if event.key == pygame.K_LEFT:
 				self.model.pointer.vx += -velocity
@@ -308,6 +317,7 @@ class PyGameKeyboardController:
 			return
 
 def game_over():
+	"""Encodes the game over message and closes the window after a period of time"""
 	font = pygame.font.Font(None, 36)
 	text = font.render(str('Game Over'), True, (255, 255, 255))
 	textRect = text.get_rect()
@@ -323,6 +333,8 @@ if __name__ == '__main__':
 	restart = True
 	while restart:
 		pygame.init()
+		pygame.mixer.music.load('Savant - ISM.ogg')
+		pygame.mixer.music.play(-1)
 
 		size = (640, 640)
 		screen = pygame.display.set_mode(size)
@@ -334,7 +346,7 @@ if __name__ == '__main__':
 		start_time = time.time()
 		clock = pygame.time.Clock()
 		while running:
-			#max fps at 30
+			#max fps at 30=
 			clock.tick(30)
 			time_since_start = time.time() - start_time
 			if int(time_since_start) > model.time_int:   #Evaluated once per second
