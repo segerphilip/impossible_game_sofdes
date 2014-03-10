@@ -4,6 +4,11 @@ Created: 3/7/14
 Program: ImpossibleGame
 
 @author: iangmhill, segerphilip
+
+This game is built to have the time alive as the score.
+The longer you live, the better time, the better score.
+The more time goes on, the more random the block generation
+is and the more blocks that spawn each second. 
 """
 
 import pygame
@@ -12,79 +17,116 @@ import random
 from random import randint
 import math
 import time
-
-
+import os
 
 class ImpossibleGameModel:
 	"""Encodes the game state of the ImpossibleGame"""
 	def __init__(self,size):
+		"""Initialize properties of model"""
 		self.width = size[0]
 		self.height = size[1]
 		self.time_int = 0
-		self.number_of_lives = 3
 		self.blocks = []
 		#new_obstacle = Obstacles(10,10,100,20,(255,0,0))
 		#self.obstacles.append(new_obstacle)
 		self.pointer = PointerArrow(320,240,10,10)
 
 	def update(self):
+		"""Update all elements of the game state"""
+		block_max = .3*self.width
+		block_min = self.pointer.width
 		collision = False
-		self.pointer.update()
 		for block in self.blocks:
-			block.update()
+			if randint(1,200) == 1:       #1 in 200 probability of block randomly changing direction
+				block.vx = -block.vx
+				block.vy = -block.vy
 			if (block.x+block.width) < 0 or block.x > self.width or (block.y+block.height) < 0 or block.y > self.height:
-				self.blocks.remove(block)
+				self.blocks.remove(block) #If block moves off screen, removing from update list
 			if block.pointer_collide(self.pointer) and collision == False:
 				collision = True
 				game_over()
+			block.update() # Update blocks normally
+		if self.pointer.x <= 0 or self.pointer.y <= 0 or (self.pointer.x+self.pointer.width) >= self.width or (self.pointer.y+self.pointer.height) >= self.height:
+			"""If pointer moves off screen, stop it"""
+			if self.pointer.vx < 0:
+				self.pointer.x = 1
+			if self.pointer.vx > 0:
+				self.pointer.x = self.width-self.pointer.width-1
+			if self.pointer.vy < 0:
+				self.pointer.y = 1
+			if self.pointer.vy > 0:
+				self.pointer.y = self.height-self.pointer.height-1
+			self.pointer.vx = 0
+			self.pointer.vy = 0
+		self.pointer.update() #Update pointer normally
+
+		if randint(1,1000) == 1: #1 in 1000 probability of all blocks changing direction
+			for block in self.blocks:
+				block.vx = -block.vx
+				block.vy = -block.vy
 
 		for block1 in self.blocks:
+			"""Larger blocks eat smaller blocks"""
+			collide = False
 			for block2 in self.blocks:
-				if block1.block_collide(block2):
+				if block1.block_collide(block2) and block1 != block2:
+					collide = True
 					if isinstance(block1,HorBlock) and isinstance(block2,VertBlock) and block1.height > block2.width and block2.width > 0:
-						block1.height += 2*abs(block1.vx)
-						block1.y -= abs(block1.vx)
+						if block1.height < block_max:
+							block1.height += 2*abs(block1.vx)
+							block1.y -= abs(block1.vx)
 						block2.width -= 2*abs(block1.vx)
 					elif isinstance(block1,VertBlock) and isinstance(block2,HorBlock) and block1.width > block2.height and block2.height > 0:
-						block1.width += 2*abs(block1.vy)
-						block1.x -= abs(block1.vy)
+						if block1.width < block_max:
+							block1.width += 2*abs(block1.vy)
+							block1.x -= abs(block1.vy)
 						block2.height -= 2*abs(block1.vy)
 					elif isinstance(block1,HorBlock) and isinstance(block2,HorBlock) and block1.height > block2.height:
 						if block1.y < block2.y and (block2.y+block2.height) > (block1.y+block1.height):
 							difference = ((block1.y+block1.height)-block2.y)
-							block1.height += difference
-							block1.y -= difference
+							if block1.height < block_max:
+								block1.height += difference
+								block1.y -= difference
 							block2.height -= difference
 							block2.y += difference
 						elif block1.y < block2.y and (block2.y+block2.height) < (block1.y+block1.height):
 							difference = block2.height
-							block1.height += difference
-							block1.y -= int(.5*difference)
+							if block1.height < block_max:
+								block1.height += difference
+								block1.y -= int(.5*difference)
 							block2.height = 0
 						elif block1.y > block2.y:
 							difference = ((block2.y+block2.height) - block1.y)
-							block1.height += difference
+							if block1.height < block_max:
+								block1.height += difference
 							block2.height -= difference
 					elif isinstance(block2,VertBlock) and isinstance(block2,VertBlock) and block1.width > block2.width:
 						if block1.x < block2.x and (block2.x+block2.width) > (block1.x+block1.width):
 							difference = ((block1.x+block1.width)-block2.x)
-							block1.width += difference
-							block1.x -= difference
+							if block1.width < block_max:
+								block1.width += difference
+								block1.x -= difference
 							block2.width -= difference
 							block2.x += difference
 						elif block1.x < block2.x and (block2.x+block2.width) < (block1.x+block1.width):
 							difference = block2.width
-							block1.width += difference
-							block1.x -= int(.5*difference)
+							if block1.width < block_max:
+								block1.width += difference
+								block1.x -= int(.5*difference)
 							block2.width = 0
 						elif block1.x > block2.x:
 							difference = ((block2.x+block2.width) - block1.x)
-							block1.width += difference
+							if block1.width < block_max:
+								block1.width += difference
 							block2.width -= difference
-					if block2.width <=0 or block2.height <= 0:
+					if block2.width <= block_min and block2.height <= block_min:
 						self.blocks.remove(block2)
+				if block2.width < block_min and collide == True or block2.height < block_min and collide == True:
+					block2.width = block_min
+					block2.height = block_min
 
 	def generateBlocks(self):
+		"""Randomly generate new blocks depending on time"""
 		for n in range(0,int(self.time_int / 10)+1):
 			if randint(0,1) == 0:               #create block moving in x axis
 				width = 10
@@ -111,6 +153,10 @@ class ImpossibleGameModel:
 					start_vx = -randint(1,2)
 				new_block = VertBlock(start_x,start_y,start_vx,width,height,(255,255,255,128))
 			self.blocks.append(new_block)
+			for block in self.blocks[:-1]:
+				if new_block.block_collide(block):
+					self.blocks = self.blocks[:-1]
+
 
 class PointerArrow:
 	"""Encodes the state of the pointer arrow"""
@@ -124,7 +170,7 @@ class PointerArrow:
 		self.vy = 0.0
 
 	def update(self):
-		self.x += self.vx * 4
+		self.x += self.vx * 4	#self.vx * 4 makes it more fun :)
 		self.y += self.vy * 4
 
 class VertBlock:
@@ -133,6 +179,7 @@ class VertBlock:
 		self.x = x
 		self.y = y
 		self.vy = vy
+		self.vx = 0
 		self.width = width
 		self.height = height
 		self.color = color
@@ -141,6 +188,7 @@ class VertBlock:
 		self.y += self.vy
 
 	def pointer_collide(self,pointer):
+		"""Encodes whether the pointer collides with anything"""
 		if self.x < pointer.x < (self.x + self.width) and self.y < pointer.y < (self.y+ self.height):
 			return True
 		elif self.x < (pointer.x+pointer.width) < (self.x + self.width) and self.y < (pointer.y+pointer.height) < (self.y+ self.height):
@@ -149,7 +197,8 @@ class VertBlock:
 			return False
 
 	def block_collide(self,block):
-		if (self.x < block.x < (self.x + self.width) and self.y < block.y < (self.y+ self.height)) or (self.x < (block.x+block.width) < (self.x + self.width) and self.y < (block.y+block.height) < (self.y+ self.height)):
+		"""Encodes whether the blocks collide with anything"""
+		if (self.x <= block.x <= (self.x + self.width) and self.y <= block.y <= (self.y+ self.height)) or (self.x <= (block.x+block.width) <= (self.x + self.width) and self.y <= (block.y+block.height) <= (self.y+ self.height)):
 			return True
 		else:
 			return False
@@ -160,6 +209,7 @@ class HorBlock:
 		self.x = x
 		self.y = y
 		self.vx = vx
+		self.vy = 0
 		self.width = width
 		self.height = height
 		self.color = color
@@ -176,7 +226,7 @@ class HorBlock:
 			return False
 
 	def block_collide(self,block):
-		if (self.x < block.x < (self.x + self.width) and self.y < block.y < (self.y+ self.height)) or (self.x < (block.x+block.width) < (self.x + self.width) and self.y < (block.y+block.height) < (self.y+ self.height)):
+		if (self.x <= block.x <= (self.x + self.width) and self.y <= block.y <= (self.y+ self.height)) or (self.x <= (block.x+block.width) <= (self.x + self.width) and self.y <= (block.y+block.height) <= (self.y+ self.height)):
 			return True
 		else:
 			return False
@@ -216,6 +266,7 @@ class PyGameImpossibleGameView:
 		pygame.display.update()
 
 	def color_scroll(self):
+		"""Add a transparent layer over the photo that changes color"""
 		phase1 = (1*self.counter_max)/6.0
 		phase2 = (2*self.counter_max)/6.0
 		phase3 = (3*self.counter_max)/6.0
@@ -243,6 +294,7 @@ class PyGameKeyboardController:
 
 	def handle_pygame_event(self, event):
 		velocity = 2.0
+		"""Velocity is controlled only when the key is held"""
 		if event.type == KEYDOWN:
 			if event.key == pygame.K_LEFT:
 				self.model.pointer.vx += -velocity
@@ -265,6 +317,7 @@ class PyGameKeyboardController:
 			return
 
 def game_over():
+	"""Encodes the game over message and closes the window after a period of time"""
 	font = pygame.font.Font(None, 36)
 	text = font.render(str('Game Over'), True, (255, 255, 255))
 	textRect = text.get_rect()
@@ -280,6 +333,8 @@ if __name__ == '__main__':
 	restart = True
 	while restart:
 		pygame.init()
+		pygame.mixer.music.load('Savant - ISM.ogg')
+		pygame.mixer.music.play(-1)
 
 		size = (640, 640)
 		screen = pygame.display.set_mode(size)
@@ -304,7 +359,7 @@ if __name__ == '__main__':
 					if event.key == K_ESCAPE:
 						running = False
 						restart = False
-					if event.key == K_r:
+					if event.key == K_SPACE:
 						running = False
 				if event.type == QUIT:
 					running = False
