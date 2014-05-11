@@ -27,6 +27,7 @@ class ImpossibleGameModel:
 		self.height = size[1]
 		self.time_int = 0
 		self.blocks = []
+		# Dead code! Kill it with fire!
 		#new_obstacle = Obstacles(10,10,100,20,(255,0,0))
 		#self.obstacles.append(new_obstacle)
 		self.pointer = PointerArrow(320,240,10,10)
@@ -52,6 +53,7 @@ class ImpossibleGameModel:
 			block.update() # Update blocks normally
 		if self.pointer.x <= 0 or self.pointer.y <= 0 or (self.pointer.x+self.pointer.width) >= self.width or (self.pointer.y+self.pointer.height) >= self.height:
 			"""If pointer moves off screen, stop it"""
+			# Random docstring is random. Also, whitespace is nicespace.
 			if self.pointer.vx < 0:
 				self.pointer.x = 1
 			if self.pointer.vx > 0:
@@ -133,6 +135,11 @@ class ImpossibleGameModel:
 					block2.width = block_min
 					block2.height = block_min
 
+					# Comments and whitespace would be super nice, so that I can actually follow what this massive
+					# block-o'-code is doing. Also, this seems like a great deal of code to achieve a rather simple goal.
+					# I see at least three instances of repeated code snippets that would make decent functions and clean
+					# this up a little bit.
+
 	def generateBlocks(self):
 		"""Randomly generate new blocks depending on time"""
 		for n in range(0,int(self.time_int / 5)+1):
@@ -164,6 +171,8 @@ class ImpossibleGameModel:
 			for block in self.blocks[:-1]:
 				if new_block.block_collide(block):
 					self.blocks = self.blocks[:-1]
+
+		# Much better comments here. Nicely done.
 
 
 class PointerArrow:
@@ -340,6 +349,10 @@ def game_over():
 	time.sleep(2)
 	pygame.quit()
 
+	# A nice next step might be to have a replay function. With a game as tightly
+	# reflex based, it would be very nice to be able to quickly retry without having
+	# to reboot the program
+
 #set up all the functions needed
 if __name__ == '__main__':
 	restart = True
@@ -348,6 +361,8 @@ if __name__ == '__main__':
 		#added a song for more appeal as a full game experience
 		pygame.mixer.music.load('Savant - ISM.ogg')
 		pygame.mixer.music.play(-1)
+
+		# Nice job in implementing sound! Love the music.
 
 		size = (640, 640)
 		screen = pygame.display.set_mode(size)
